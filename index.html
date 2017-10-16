@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Terrain-less Procedural Content Generation with Lua</title>
+
+    <meta name="description" content="Procedural Generation is used often to generate large amounts of content from a small(ish) set of rules. In videogames it's often applied to the generation of geographical / topological data. On this talk I would like to explore how Lua's expressiveness can be leveraged to generate other kinds of data.">
+    <meta name="author" content="Enrique García Cota">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/kikito.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/vs.css">
+
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section data-markdown data-separator="\*\*\*">
+          <script type="text/template">
+
+<!-- .slide: data-background="./img/title.jpg" -->
+
+## Terrain-less
+### Procedural Content Generation
+## with Lua
+
+<div class="subtitle">
+  <p><small>Enrique García Cota (kikito)</small></p>
+  <p><small><a href="https://www.lua.org/wshop17.html">Lua workshop 2017</a></small></p>
+</blockquote>
+
+
+***
+
+<figure class="stretch">
+  <img src="./img/thijs.jpg" class="stretch" height="100%">
+</figure>
+
+***
+
+<!-- .slide: data-background="#008AB8" -->
+
+## I. Intro
+## II. L-Systems
+## III. Other applications
+## IV. Conclussion
+
+***
+
+# I. Intro
+
+***
+
+<figure class="stretch">
+  <a href="https://www.lua.org">
+    <img src="./img/lua.jpg" class="stretch plain" width="100%">
+  </a>
+  <small>https://www.lua.org</small>
+</figure>
+
+***
+
+# Procedural Content Generation
+
+***
+
+# PCG
+
+***
+
+<figure class="stretch">
+  <img src="./img/zelda.gif" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/hand-drawn-map.png" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/zelda.gif" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/zelda2.gif" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<!-- .slide: data-background="#000000" -->
+<figure class="stretch">
+  <img src="./img/snes-cartridge.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/snes.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<!-- .slide: data-background="#000000" -->
+<figure class="stretch">
+  <img src="./img/snes-blow.gif" class="stretch plain" width="100%">
+</figure>
+
+***
+
+## 48 MBits
+
+***
+
+## 6 MB
+
+***
+
+<!-- .slide: data-background="./img/large.jpg" -->
+
+***
+
+<!-- .slide: data-background="./img/even-larger.jpg" -->
+
+***
+
+<figure class="stretch">
+  <img src="./img/game-artist.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+## 💰💰💰
+## ⌛️⌛️⌛️
+
+***
+
+<figure class="stretch">
+  <img src="./img/mass-place.gif" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/minecraft.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/no-mans-sky-1.png" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/no-mans-sky-2.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/no-mans-sky-3.png" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/brogue.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+# II. L-Systems
+
+***
+
+## Lindenmayer Systems
+
+***
+
+<figure class="stretch">
+  <img src="./img/turtle1.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/turtle2.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<!-- .slide: data-background="#000000" -->
+<figure class="stretch">
+  <img src="./img/turtle3.jpg" class="stretch plain" width="100%">
+</figure>
+
+
+***
+https://twitter.com/ncasenmare/status/919219174311911424
+
+***
+
+<figure class="stretch">
+  <img src="./img/turtle2.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+``` lua
+turtle.forward()
+turtle.left()
+turtle.forward()
+turtle.right()
+turtle.right()
+turtle.forward()
+turtle.left()
+turtle.forward()
+```
+
+***
+
+``` text
+F
+L
+F
+R
+R
+F
+L
+F
+```
+
+***
+
+``` text
+"FLFRRFLF"
+```
+
+***
+
+```
+"F-F++F-F"
+```
+
+***
+
+``` lua
+local rules  = { F = "F-F++F-F" }
+```
+
+***
+
+``` lua
+local rules  = { F = "F-F++F-F" }
+local axiom  = "F"
+```
+
+***
+
+``` text
+
+1. F
+2. F-F++F-F
+3. F-F++F-F-F-F++F-F++F-F++F-F-F-F++F-F
+...
+
+```
+
+***
+
+<figure class="stretch">
+  <img src="./img/koch.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/tabop.png" class="stretch" height="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/trees.png" class="stretch" height="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/trees2.png" class="stretch" height="100%">
+</figure>
+
+***
+
+<!-- .slide: data-background="#000000" -->
+<figure class="stretch">
+  <a href="http://www.graphica.com/">
+    <img src="./img/trott.jpg" class="stretch" width="100%">
+  </a>
+  <small>http://www.graphica.com/</small>
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/mass-place.gif" class="stretch plain" width="100%">
+</figure>
+
+***
+
+
+<!-- .slide: data-background="#000000" -->
+<figure class="stretch">
+  <a href="http://speedtree.com/">
+    <img src="./img/speedtree.gif" class="stretch" width="100%">
+  </a>
+
+  <small>https://speedtree.com</small>
+</figure>
+
+***
+
+http://www.voxelfarm.com/
+http://procworld.blogspot.com/
+
+***
+
+<!-- .slide: data-background="./img/voxel-farm-1.jpg" -->
+
+***
+
+<!-- .slide: data-background="#000000" -->
+<figure class="stretch">
+  <a href="http://procworld.blogspot.com/">
+    <img src="./img/voxel-farm-2.jpg" class="stretch" width="100%">
+  </a>
+
+  <small>http://www.voxelfarm.com/</small>
+</figure>
+
+***
+<figure class="stretch">
+  <a href="http://procworld.blogspot.com/">
+    <img src="./img/voxelfarm-primitives.gif" class="stretch" width="100%">
+  </a>
+
+  <small>http://www.voxelfarm.com/</small>
+</figure>
+
+
+***
+
+```
+branch : height > 5 {
+  center xz
+  scale [80%, 88%, 80%]
+  module {
+    material wingright
+    rotate z 25
+    rotate y 25
+    module {
+      move [0, height, 0]
+      module branch
+    }
+  }
+  module {
+    material wingleft
+    rotate z -25
+    rotate x -5
+    module {
+      instance "wall_1m"
+      occludes branch
+      module {
+        move [0, height, 0]
+        module branch
+      }
+    }
+  }
+}
+
+```
+
+***
+
+``` lua
+function branch()
+  if height > 5 then return end
+  center_xz()
+  scale(0.8, 0.88, 0.8)
+  module(function()
+    material = "wingright"
+    rotate({z = 25, y = 25})
+    module(function()
+      move(0, height, 0)
+      branch()
+    end)
+  end)
+  module(function()
+    material = "wingleft"
+    rotate({ z = -25, x = -5 })
+    module(function()
+      instance("wall_1m")
+      occludes("branch")
+      module(function()
+        move(0, height, 0)
+        branch()
+      end)
+    end)
+  end)
+end)
+
+```
+
+***
+
+# III. Other Systems
+
+***
+
+<figure class="stretch">
+  <img src="./img/music.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+<figure class="stretch">
+  <img src="./img/artist.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+## [🎶 ▶️ ](./img/music.ogg)
+
+***
+
+<figure class="stretch">
+  <a href="https://www.youtube.com/watch?v=vkTMK1a1_tY">
+    <img src="./img/moonlet.png" class="stretch plain" width="100%">
+  </a>
+  <small>https://www.youtube.com/watch?v=vkTMK1a1_tY</small>
+</figure>
+
+***
+
+https://github.com/elihugarret/Moonlet
+
+***
+
+<figure class="stretch">
+  <a href="https://www.gamasutra.com/blogs/TanyaXShort/20170222/291312/Maximizing_the_Impact_of_Procedural_Personalities.php">
+    <img src="./img/personality.jpg" class="stretch plain" width="100%">
+  </a>
+  <small>http://goo.gl/DFBx7v</small>
+</figure>
+
+***
+
+<figure class="stretch">
+  <a href="http://3dgamedevblog.com/wordpress/?p=836">
+    <img src="./img/no-mans-sky-animal.png" class="stretch plain" height="90%">
+  </a>
+  <small>http://3dgamedevblog.com/wordpress/?p=836</small>
+</figure>
+
+***
+
+<figure class="stretch">
+  <a href="http://3dgamedevblog.com/wordpress/?p=836">
+    <img src="./img/no-mans-sky-animal2.png" class="stretch plain" height="90%">
+  </a>
+  <small>http://3dgamedevblog.com/wordpress/?p=836</small>
+</figure>
+
+***
+
+<figure class="stretch">
+  <a href="https://decide.madrid.es">
+    <img src="./img/decide-madrid-2.png" class="stretch plain" width="100%">
+  </a>
+</figure>
+
+***
+
+<figure class="stretch">
+  <a href="https://github.com/consul/consul">
+    <img src="./img/decide-madrid.png" class="stretch plain" width="100%">
+  </a>
+</figure>
+
+***
+
+http://decide.madrid.es
+
+***
+
+<small>https://github.com/consul/consul/blob/master/db/dev_seeds.rb</small>
+
+***
+
+# IV. Conclussion
+
+***
+
+<figure class="stretch">
+  <img src="./img/brogue.jpg" class="stretch plain" width="100%">
+</figure>
+
+***
+
+http://www.bay12games.com/dwarves/
+
+***
+
+* Stopped aerial births
+* Rain kills everything it lands on
+* Undead cat can adopt dwarf
+* Undead dwarf contracted were-chameleon curse
+* Giraffe is trainable for war
+
+***
+
+# ¿Questions?
+
+### Enrique García Cota
+### [@otikik](https://twitter.com/otikik) / [kikito](https://github.com/kikito)
+
+***
+
+<!-- .slide: data-background="./img/thank-you.jpg" -->
+
+          </script>
+        </section>
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+
+        width: 960,
+        height: 700,
+
+        margin: 0.1,
+
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.2,
+        maxScale: 1,
+
+        center: true,
+
+        theme: 'kikito',
+        transition: 'fade', // default/cube/page/concave/zoom/linear/fade/none
+        transitionSpeed: 'fast',
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return true; }, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/notes/notes.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
